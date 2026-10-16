@@ -1,5 +1,7 @@
 # cxd_map
 
+Merged into CXD (https://github.com/NaNIsaac/CXD); this repo is no longer maintained.
+
 Bragg coherent X-ray diffraction (BCDI) peak analysis: maps a 3D diffraction pattern around its center of mass onto a (cos θ, φ) angular histogram, finds streak/facet directions with DBSCAN, plots intensity line profiles along opposite direction pairs, and renders a 3D VTK view of the pattern in reciprocal-space coordinates.
 
 3D 회절 패턴(ROI `.mat`)의 질량중심 기준 방향 분포에서 스트릭 방향을 찾아 축별 라인 프로파일을 그리는 분석 스크립트. 개인 분석 코드이며 유지보수되지 않음. 이후 작업은 [CXD](https://github.com/NaNIsaac/CXD) 에서 진행 (`.mat` 로더 `cxd.core.io_util.load_cxd_mat`, CoM 등).
