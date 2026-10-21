@@ -1,13 +1,13 @@
+import os
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.ndimage import gaussian_filter, map_coordinates
-
 from cxd_map.io_util import load_roi_mat
 from cxd_map.mapping import extract_peak_from_2d_map, map2spherical, shear_correction
 from cxd_map.statistics import center_of_mass
 from cxd_map.visualize import vtk_visualize_cxd
+from scipy.ndimage import gaussian_filter, map_coordinates
 
 
 def get_thick_line_profile(
@@ -181,8 +181,8 @@ def plot_origin_style(combined_results, show=True) -> plt.Figure:
     return fig
 
 def main():
-    data_dir: Path = Path(r"D:\05_Resources\Data\9C_260324\onsite\ROI")
-    save_dir: Path = Path(r"D:\05_Resources\Data\9C_260324\analysis")
+    data_dir: Path = Path(os.environ["DATA"], r"260324_9C\onsite\ROI")
+    save_dir: Path = Path(os.environ["DATA"], r"260324_9C\analysis")
     run_ns: list[int]   = [255]
 
     params = {
