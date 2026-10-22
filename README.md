@@ -1,10 +1,10 @@
 # cxd_map
 
-Merged into CXD (https://github.com/NaNIsaac/CXD); this repo is no longer maintained.
+This repository keeps the implementation as it was before it was imported into [CXD](https://github.com/NaNIsaac/CXD) with its history on 2026-10-16 (CXD f669861, moved to `cxd.mapping` in eeb127f). There, `mapping.py` is split into `cxd.mapping.spherical` and `qorageom` (`shear_correction`, `rotation_matrix`), `analysis.py` is `cxd.mapping.analysis`, `visualize.py` is `cxd.mapping.vtk_view`, the line-profile code of `main.py` is `cxd.mapping.profiles` and `scripts/streak_profiles.py`, `load_roi_mat` is `qorageom.io.load_mat` and `center_of_mass` is `cxd.core.statistics.get_com`. `map2solid_angle`, used only in `notebooks/test.ipynb`, was not carried over.
 
 Bragg coherent X-ray diffraction (BCDI) peak analysis: maps a 3D diffraction pattern around its center of mass onto a (cos θ, φ) angular histogram, finds streak/facet directions with DBSCAN, plots intensity line profiles along opposite direction pairs, and renders a 3D VTK view of the pattern in reciprocal-space coordinates.
 
-3D 회절 패턴(ROI `.mat`)의 질량중심 기준 방향 분포에서 스트릭 방향을 찾아 축별 라인 프로파일을 그리는 분석 스크립트. 개인 분석 코드이며 유지보수되지 않음. 이후 작업은 [CXD](https://github.com/NaNIsaac/CXD) 에서 진행 (`.mat` 로더 `cxd.core.io_util.load_cxd_mat`, CoM 등).
+3D 회절 패턴(ROI `.mat`)의 질량중심 기준 방향 분포에서 스트릭 방향을 찾아 축별 라인 프로파일을 그리는 분석 스크립트. 개인 분석 코드.
 
 ## Requirements
 
