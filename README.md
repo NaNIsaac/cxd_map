@@ -1,6 +1,6 @@
 # cxd_map
 
-Superseded by [CXD](https://github.com/NaNIsaac/CXD), which contains this code (`cxd.mapping.spherical`, `cxd.mapping.analysis`, `cxd.mapping.vtk_view` and `scripts/streak_profiles.py`). This repository is no longer maintained; use CXD for new work.
+This repository keeps the implementation as it was before it was imported into [CXD](https://github.com/NaNIsaac/CXD) with its history on 2026-10-16 (CXD f669861, moved to `cxd.mapping` in eeb127f). There, `mapping.py` is split into `cxd.mapping.spherical` and `qorageom` (`shear_correction`, `rotation_matrix`), `analysis.py` is `cxd.mapping.analysis`, `visualize.py` is `cxd.mapping.vtk_view`, the line-profile code of `main.py` is `cxd.mapping.profiles` and `scripts/streak_profiles.py`, `load_roi_mat` is `qorageom.io.load_mat` and `center_of_mass` is `cxd.core.statistics.get_com`. `map2solid_angle`, used only in `notebooks/test.ipynb`, was not carried over.
 
 Bragg coherent X-ray diffraction (BCDI) peak analysis for one 3D diffraction pattern. It maps the pattern around its center of mass onto a (cos θ, φ) angular histogram, finds streak and facet directions in that map with DBSCAN, plots intensity line profiles along pairs of opposite directions, and renders the pattern in reciprocal-space coordinates with VTK.
 
