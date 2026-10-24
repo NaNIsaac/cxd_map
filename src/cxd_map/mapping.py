@@ -3,7 +3,6 @@ from sklearn.cluster import DBSCAN
 
 def rotation_matrix(angle, axis):
     # Rodrigues' rotation formula implementation
-    # cite: 274
     c, s = np.cos(angle), np.sin(angle)
     ux, uy, uz = axis
     return np.array([
@@ -15,25 +14,23 @@ def rotation_matrix(angle, axis):
 def shear_correction(wavelength: float, delta_theta: float, D: float, gamma: float, delta: float, pixel_size: float) -> np.ndarray:
     s1, s2, s3 = np.eye(3)
 
-    # Detector rotation matrix [cite: 291]
-    # Note: Negative gamma due to clockwise rotation at 34-ID-C [cite: 299]
+    # Negative gamma: the rotation is clockwise at 34-ID-C
     R_delta = rotation_matrix(delta, s2)
     R_gamma = rotation_matrix(gamma, -s1)
     B_det = R_delta @ R_gamma 
 
-    # Extract ki, kj directions from B_det columns [cite: 300, 302]
     ki_hat = B_det[:, 0]
     kj_hat = B_det[:, 1]
 
-    # q_i and q_j magnitude [cite: 243, 320, 321]
+    # |q_i| = |q_j| = pixel_size / (wavelength * D)
     pref = pixel_size / (wavelength * D)
     qi = pref * ki_hat
     qj = pref * kj_hat
 
-    # Compute q_k from rocking step [cite: 314, 325]
-    q0 = (1/wavelength) * (B_det @ s3 - s3) # [cite: 310]
+    # q_k from the change of q0 over one rocking step
+    q0 = (1/wavelength) * (B_det @ s3 - s3)
     dq0 = (rotation_matrix(delta_theta, s2) @ q0) - q0
-    qk = -dq0 # [cite: 318]
+    qk = -dq0
 
     B_recip = np.stack([qi, qj, qk], axis=1)
 
@@ -68,27 +65,21 @@ def map2spherical(
     imgs: np.ndarray, com: np.ndarray, bins: int = 100
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
-    3D 이미지를 구면 좌표계(u, phi) 히스토그램으로 매핑합니다.
+    Map a 3D image to an intensity-weighted (u=cos(theta), phi) histogram of directions from `com`.
     """
-    # 1. 좌표 그리드 생성 (3, Z, Y, X)
+    # indices: (3, Z, Y, X)
     indices = np.indices(imgs.shape).astype(float)
-
-    # 2. 중심점(CoM) 기준 상대 좌표 계산 (Broadcasting 수정)
-    # com을 (3, 1, 1, 1)로 변환하여 뺄셈 수행
+    # com reshaped to (3, 1, 1, 1) for broadcasting
     coords = indices - com[:, None, None, None]
 
-    # 3. 노름 계산 (axis=0이 좌표축임)
     r = np.linalg.norm(coords, axis=0, keepdims=True)
     r = np.where(r == 0, 1e-10, r)
 
-    # 4. 단위 방향 벡터 (3, Z, Y, X)
     unit_vectors = coords / r
 
-    # 5. u-phi 매핑 데이터 준비
     u = unit_vectors[0]  # nz (cos theta)
     phi = np.arctan2(unit_vectors[1], unit_vectors[2])  # ny, nx
 
-    # 6. 히스토그램 생성
     hist, u_edges, phi_edges = np.histogram2d(
         u.ravel(),
         phi.ravel(),
@@ -109,14 +100,12 @@ def extract_peak_from_2d_map(
     threshold_rel: float = 0.2,
 ) -> np.ndarray:
     """
-    2D 히스토그램에서 전처리된 강도를 바탕으로 3D 피크 방향 벡터를 추출합니다.
+    Extract 3D peak direction vectors from a 2D (u, phi) histogram by clustering its bright bins.
     """
-    # 1. 빈(bin)의 중심 좌표 계산
     u_centers = (u_edges[:-1] + u_edges[1:]) / 2
     phi_centers = (phi_edges[:-1] + phi_edges[1:]) / 2
     uu, pp = np.meshgrid(u_centers, phi_centers, indexing="ij")
 
-    # 2. 강도 기반 필터링 (전처리된 hist 사용)
     mask = hist > (np.max(hist) * threshold_rel)
     u_val = uu[mask]
     p_val = pp[mask]
@@ -125,7 +114,7 @@ def extract_peak_from_2d_map(
     if len(u_val) == 0:
         return np.array([])
 
-    # 3. (u, phi)를 다시 3D 단위 벡터로 역변환 (중요: map2spherical의 규칙 준수)
+    # Back to 3D unit vectors, following the map2spherical convention
     # nz = u, ny = r_xy * sin(phi), nx = r_xy * cos(phi)
     r_xy = np.sqrt(np.maximum(0, 1 - u_val**2))
     nz = u_val
@@ -134,7 +123,7 @@ def extract_peak_from_2d_map(
 
     v_pts = np.stack([nz, ny, nx], axis=1)  # (N_points, 3)
 
-    # 4. 3D 벡터 공간에서 클러스터링 (주기성 자동 해결)
+    # Cluster in 3D vector space, which handles the periodicity of phi
     clustering = DBSCAN(eps=eps, min_samples=min_samples).fit(
         v_pts, sample_weight=w_val
     )
@@ -143,7 +132,6 @@ def extract_peak_from_2d_map(
     peak_vectors = []
     for label in set(labels) - {-1}:
         c_mask = labels == label
-        # 가중 평균으로 정밀한 피크 위치 결정
         avg_v = np.average(v_pts[c_mask], axis=0, weights=w_val[c_mask])
         peak_vectors.append(avg_v / np.linalg.norm(avg_v))
 
